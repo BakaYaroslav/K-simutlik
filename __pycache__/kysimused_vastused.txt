@@ -1,0 +1,10 @@
+1. Mis on Eesti pealinn?: Tallinn
+2. Mis värvi on lumi?: valge
+3. Mitu silma on inimesel?: 2
+4. Mis on 2 + 2?: 4
+5. Mis on Eesti riigikeel?: eesti
+6. Mis värvi on muru?: roheline
+7. Kas koer ütleb miau või au?: au
+8. Mis on päikese värv?: kollane
+9. Mitu jalga on kassil?: 4
+10. Kas vesi on märg või kuiv?: märg
