@@ -19,11 +19,12 @@ kus_vas = {
 
 stat = {}
 
-
-if not os.path.isfile('kysimused_vastused.txt') or os.path.getsize('kysimused_vastused.txt') == 0:
-    with open('kysimused_vastused.txt', 'w', encoding='utf-8') as f:
-        for j, (kysimus, vastus) in enumerate(kus_vas.items(), start=1):
-            f.write(f'{j}. {kysimus}: {vastus}\n')
+def küsimuste_algne_salvestamine():
+    if not os.path.isfile('kysimused_vastused.txt') or os.path.getsize('kysimused_vastused.txt') == 0:
+        with open('kysimused_vastused.txt', 'w', encoding='utf-8') as f:
+            for j, (kysimus, vastus) in enumerate(kus_vas.items(), start=1):
+                f.write(f'{j}. {kysimus}: {vastus}\n')
+        print('Küsimused on lisanud faili.')
 
 def int_kontroll(sisend: str) -> int:
     while True:
@@ -121,19 +122,39 @@ def emaili_saatmine():
     sender_email_address = 'jaroslavbaka25@gmail.com'
     email_password = 'qztk ogxx duva gvez'
     email_smtp = 'smtp.gmail.com'
-    
+    best_score = -1
+    best_name = ''
+
+    with open('kõik.txt', 'r', encoding='utf-8') as f:
+        for line in f:
+            parts = line.strip().split(' - ')
+            nimi = parts[0]
+            score = int(parts[1])
+            if score > best_score:
+                best_score = score
+                best_name = nimi
+    read_lines = []
+    with open('kõik.txt', 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                read_lines.append(line.strip())
+        
+
     try:
         message = EmailMessage()
         if tulemus == 'SOBIS':
             body = f'Tere, {nimi}!\n\n✅ Test on edukalt läbitud!\n📊 Sinu tulemus: {score} õiget vastust.\nHästi tehtud!'
         else:
             body = f'Tere, {nimi}!\n\n❌ Sel korral test ebaõnnestus.\n📊 Sinu tulemus: {score} õiget vastust.\nÄra anna alla, proovi uuesti!'
-        
+
+
         message['Subject'] = email_subject
         message['From'] = sender_email_address
         message['To'] = email
         message.set_content(body)
-        
+
+
+
         with smtplib.SMTP_SSL(email_smtp, 465) as server:
             server.login(sender_email_address, email_password)
             server.send_message(message)
@@ -141,10 +162,45 @@ def emaili_saatmine():
     except Exception as e:
         print('Tekkis viga emaili saatmisel:', e)
 
+    if len(nimid) >= 5:
+        message_stat = EmailMessage()
+        line = '\n'.join(read_lines[-5:])
+        info = ['Tere! \n',
+                '\n',
+                'Tänased küsimustiku tulemused:',
+                '\n',
+                f'{line}',
+                '\n',
+                f'Parim vastaja: {best_name} ({best_score} õigesti)',
+                ]
+        message_stat['Subject'] = 'Küsimustiku kokkuvõte'
+        message_stat['From'] = sender_email_address
+        message_stat['To'] = sender_email_address
+        message_stat.set_content('\n'.join(info))
+        andmete_kustutamine()
+
+        with smtplib.SMTP_SSL(email_smtp, 465) as server:
+            server.login(sender_email_address, email_password)
+            server.send_message(message_stat)
+        print('Kokkuvõte saadetud emailiga!')
+
+
+
 def testimine():
-    global tulemus, score, nimi, email
+    global tulemus, score, nimi, email, nimid
     
-    nimi = input('Sisesta oma nimi: ')
+    nimi = input('Sisesta oma nimi ja perekonanimi: ')
+    n, p = nimi.split(' ')[0], nimi.split(' ')[-1]
+    ask = input(f"Kas see on õige email {n.lower()}.{p.lower()}@gmail.com? (j/e): ").lower()
+    if ask == 'j':
+        email = f'{n.lower()}.{p.lower()}@gmail.com'
+    else:
+        while True:
+            email = input('Sisesta oma email: ')
+            if '@' not in email or '.' not in email:
+                print('Palun sisesta kehtiv emaili aadress.')
+            else:
+                break
     
 
     nimid = []
@@ -157,13 +213,6 @@ def testimine():
         print(f'{nimi}, sa oled juba testi sooritanud.')
         return
 
-
-    while True:
-        email = input('Sisesta oma email: ')
-        if '@' not in email or '.' not in email:
-            print('Palun sisesta kehtiv emaili aadress.')
-        else:
-            break
 
     if not kus_vas:
         print('Küsimuste faili pole або see on tühi.')
@@ -197,6 +246,7 @@ def testimine():
 
 
     with open('kõik.txt', 'a', encoding='utf-8') as f:
+        nimid.append(nimi)
         f.write(f'{nimi} - {score} - {email} - {tulemus}\n')
     
     if tulemus == 'SOBIS':
