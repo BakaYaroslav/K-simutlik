@@ -1,7 +1,7 @@
 ﻿import os
 from Kysimutlik_Module import * 
 while True:
-    menu = input("Vali tegevus: \n1. Andmete lugemine failidest\n2. Küsimuste lisamine/kutvustamine\n3. Test\n4. Kustutada kõik andmed\n5. Välju\nSisesta valik (1/2/3/4/5): ")
+    menu = input("Vali tegevus: \n1. Andmete lugemine failidest\n2. Küsimuste lisamine/kustutamine\n3. Test\n4. Kustutada kõik andmed\n5. Välju\nSisesta valik (1/2/3/4/5): ")
     if menu == '1':
         read = andmete_lugemine_failidest()
         print("Küsimused ja vastused:", read)

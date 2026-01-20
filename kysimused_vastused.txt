@@ -1,0 +1,4 @@
+1. Kas koer ütleb miau või au?: au
+2. Mis on päikese värv?: kollane
+3. Mitu jalga on kassil?: 4
+4. Kas vesi on märg või kuiv?: märg

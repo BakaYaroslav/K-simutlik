@@ -34,19 +34,19 @@ def int_kontroll(sisend: str) -> int:
             sisend = input('Palun sisesta täisarv: ')
 
 def andmete_lugemine_failidest(filename='kysimused_vastused.txt'):
-    try:
-        with open(filename, 'r', encoding='utf-8') as f:
-            for rida in f:
-                rida = rida.strip()
-                if ':' in rida:
-                    puhas_rida = rida.split('. ', 1)[-1]
-                    kysimus, vastus = puhas_rida.split(':', 1)
-                    kus_vas[kysimus.strip()] = vastus.strip()
-        return kus_vas
-    except FileNotFoundError:
-        return kus_vas
+    read_lines = []
+    with open('kysimused_vastused.txt', 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                read_lines.append(line.strip())
+                
+    for i, line in enumerate(read_lines):
+        print(f" {line}")
 
 def küsimuste_lisamine():
+    ''' Funktsioon küsimuste lisamiseks või kustutamiseks
+        Kui me kustutamine me ostime number ja kustutame numbrini
+        '''
     while True:
         valik = input('Kas soovid lisada (l) або kustutada (k) küsimusi? ').lower()
         if valik not in ['l', 'k']:
@@ -59,7 +59,7 @@ def küsimuste_lisamine():
                 print('Palun sisesta positiivne täisarv.')
                 continue
             
-            for _ in range(mitu_küsimust):
+            for i in range(mitu_küsimust):
                 küs = input('Sisesta küsimus: ')
                 vas = input('Sisesta vastus: ')
                 stat[küs] = vas
@@ -81,27 +81,39 @@ def küsimuste_lisamine():
             if ask == 'j':
                 with open('kysimused_vastused.txt', 'w', encoding='utf-8') as f:
                     f.write('')
+                    kus_vas.popitem # eemaldab viimase lisatud küsimuse-vastuse paari
                 print('Kõik küsimused on kustutatud.')
             elif ask == 'e':
-                read_lines = []
+                   # lugeme olemasolevad küsimused
                 with open('kysimused_vastused.txt', 'r', encoding='utf-8') as f:
-                    for line in f:
-                        if line.strip():
-                            read_lines.append(line.strip())
-                
-                for i, line in enumerate(read_lines):
-                    print(f"{i+1}. {line}")
-                
-                idx = int_kontroll(input('Sisesta kustutatava küsimuse number: ')) - 1
-                if 0 <= idx < len(read_lines):
-                    del read_lines[idx]
-                    with open('kysimused_vastused.txt', 'w', encoding='utf-8') as f:
-                        for i, line in enumerate(read_lines, start=1):
-                            sisu = line.split('. ', 1)[-1]
-                            f.write(f'{i}. {sisu}\n')
-                    print('Küsimus kustutatud.')
-                else:
-                    print('Vale number.')
+                    read_lines = [line.strip() for line in f if line.strip()] # line.strip() eemaldab tühjad read, if line.strip() tagab, et ainult mitte-tühjad read lisatakse
+
+                # Näitame olemasolevaid küsimusi
+                for line in read_lines:
+                    print(line)
+
+                # Küsime kasutajalt, millised küsimused kustutada
+                to_delete = input('Sisesta kustutatava küsimuse numbrid (nt 2,4): ')
+                to_delete = [int(x.strip()) for x in to_delete.split(',')]
+                if any(num < 1 or num > len(read_lines) for num in to_delete):  # kontrollime kehtivust
+                    print('Vigased numbrid sisestatud. Proovi uuesti.')
+                    continue
+
+                # Eemaldame valitud küsimused ja loome uue nimekirja ridadega
+                new_lines = []
+                for i, line in enumerate(read_lines, start=1):
+                    if i not in to_delete:
+                        new_lines.append(line)
+
+                # Salvestame uuendatud nimekirja faili
+                with open('kysimused_vastused.txt', 'w', encoding='utf-8') as f:
+                    for i, line in enumerate(new_lines, start=1):
+                        question = line.split('. ', 1)[-1]  # eemaldab numbri ja punkti 
+                        f.write(f"{i}. {question}\n")
+
+                print('Küsimused kustutatud!')
+
+
             break
 
 def emaili_saatmine():
@@ -150,25 +162,27 @@ def testimine():
         email = input('Sisesta oma email: ')
         if '@' not in email or '.' not in email:
             print('Palun sisesta kehtiv emaili aadress.')
-            continue
-        break
+        else:
+            break
 
-    andmete_lugemine_failidest()
-    
     if not kus_vas:
         print('Küsimuste faili pole або see on tühi.')
         return
 
     score = 0
-    küsimused = list(kus_vas.items())
-    random.shuffle(küsimused)
+    with open('kysimused_vastused.txt', 'r', encoding='utf-8') as f:
+        kus = f.readlines()
+  
+    random.shuffle(kus)
     
-    rand_kus = min(len(küsimused), 1)
+    rand_kus = min(5, len(kus))
     
     for i in range(rand_kus):
-        k, v = küsimused[i]
-        vastus = input(f'{k} ')
-        if vastus.strip().lower() == v.strip().lower():
+        kysimus, vastus = kus[i].split('. ', 1)[-1].rsplit(': ', 1) # eraldab küsimuse ja vastuse ja eemaldab numbrid 
+        v = vastus.strip()
+        user_answer = input(f'{kysimus.strip()} ')
+
+        if user_answer.strip().lower() == v.lower():
             print('Õige vastus!')
             score += 1
         else:
