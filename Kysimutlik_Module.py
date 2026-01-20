@@ -2,8 +2,8 @@
 import random
 import smtplib
 from email.message import EmailMessage
-
-
+k = ["yaroslav"]
+s = ["Yarik123."]
 kus_vas = {
     'Mis on Eesti pealinn?': 'Tallinn', 
     'Mis värvi on lumi?': 'valge', 
@@ -184,8 +184,6 @@ def emaili_saatmine():
             server.send_message(message_stat)
         print('Kokkuvõte saadetud emailiga!')
 
-
-
 def testimine():
     global tulemus, score, nimi, email, nimid
     
@@ -223,8 +221,13 @@ def testimine():
         kus = f.readlines()
   
     random.shuffle(kus)
+
+    if len(kus) < 5:
+        print('Vahe küsimused, palun lisa küsimused')
+    return
+
+    rand_kus = random.randint(5, len(kus))
     
-    rand_kus = min(5, len(kus))
     
     for i in range(rand_kus):
         kysimus, vastus = kus[i].split('. ', 1)[-1].rsplit(': ', 1) # eraldab küsimuse ja vastuse ja eemaldab numbrid 
@@ -264,3 +267,13 @@ def andmete_kustutamine():
         with open(file, 'w', encoding='utf-8') as f:
             f.write('')
     print('Andmed on kustutatud.')
+           
+def auth(k, s)->str:
+    login = input("Sisesta kasutajanimi: ")
+    parool = input("Sisesta parool: ")
+    if login in k:
+        indeks = k.index(login)
+        if s[indeks] == parool:
+            return True
+    else:
+        print("Vale kasutajanimi või parool")
