@@ -189,17 +189,24 @@ def testimine():
     
     nimi = input('Sisesta oma nimi ja perekonanimi: ')
     n, p = nimi.split(' ')[0], nimi.split(' ')[-1]
-    ask = input(f"Kas see on õige email {n.lower()}.{p.lower()}@gmail.com? (j/e): ").lower()
-    if ask == 'j':
-        email = f'{n.lower()}.{p.lower()}@gmail.com'
-    else:
-        while True:
-            email = input('Sisesta oma email: ')
-            if '@' not in email or '.' not in email:
-                print('Palun sisesta kehtiv emaili aadress.')
-            else:
-                break
-    
+    while True:
+        ask = input(f"Kas see on õige email {n.lower()}.{p.lower()}@gmail.com? (j/e): ").lower()
+        if ask not in ['j', 'e']:
+            print("Palun sisesta 'j' või 'e'.")
+        
+        if ask == 'j':
+            email = f'{n.lower()}.{p.lower()}@gmail.com'
+            break
+        elif ask == 'e':
+            while True:
+                email = input('Sisesta oma email: ')
+                if '@' not in email or '.' not in email:
+                    print('Palun sisesta kehtiv emaili aadress.')
+                else:
+                    break
+        break
+
+
 
     nimid = []
     if os.path.isfile('kõik.txt'):
@@ -211,20 +218,14 @@ def testimine():
         print(f'{nimi}, sa oled juba testi sooritanud.')
         return
 
-
-    if not kus_vas:
-        print('Küsimuste faili pole або see on tühi.')
-        return
-
     score = 0
     with open('kysimused_vastused.txt', 'r', encoding='utf-8') as f:
         kus = f.readlines()
-  
     random.shuffle(kus)
 
     if len(kus) < 5:
         print('Vahe küsimused, palun lisa küsimused')
-    return
+        return
 
     rand_kus = random.randint(5, len(kus))
     

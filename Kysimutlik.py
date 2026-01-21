@@ -13,6 +13,7 @@ while User:
             if login:
                 print("Sisselogimine edukas. Tere tulemast, admin!")
                 User = False
+                Admin = True
         elif menu_user == '3':
             print("Väljumine programmist.")
             User = False
